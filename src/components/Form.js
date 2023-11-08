@@ -3,6 +3,7 @@ import React from "react";
 function Form(props) {
 
   const [name, setName] = React.useState('');
+  const [category, setCategory] = React.useState('');
 
   function handleChange(e) {
     setName(e.target.value);
@@ -10,8 +11,13 @@ function Form(props) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    props.addTask(name);
+    props.addTask(name, category);
     setName("");
+    setCategory("");
+  }
+
+  function handleSelectChange(e) {
+    setCategory(e.target.value);
   }
 
   return (
@@ -31,6 +37,22 @@ function Form(props) {
         onChange={handleChange}
         required={true}
       />
+
+      {/* categories */}
+      <h2 className="label-wrapper">
+        <label className="label__lg" htmlFor="slct">
+          Categoría
+        </label>
+      </h2>
+      <div className="select">
+        <select name="slct" id="slct" className="select__lg" onChange={handleSelectChange}>
+          <option disabled>Selecciona una categoría</option>
+          { Object.keys(props.categories).map((key) => (
+            <option key={key} value={props.categories[key]}>{props.categories[key]}</option>
+          ))}
+        </select>
+      </div>
+
       <button type="submit" className="btn btn__primary btn__lg">
         Agregar
       </button>

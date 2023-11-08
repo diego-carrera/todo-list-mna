@@ -2,11 +2,13 @@
 // import './App.css';
 
 import React from "react";
-import { nanoid } from "nanoid";
 
 import FilterButton from "./components/FilterButton";
 import Form from "./components/Form";
 import Todo from "./components/Todo";
+import todosAPI from "./api/todos";
+import categoriesAPI from "./api/categories";
+
 
 const FILTER_MAP = {
   Todas      : () => true,
@@ -18,28 +20,46 @@ const FILTER_NAMES = Object.keys(FILTER_MAP);
 
 function App() {
 
-  const [tasks, setTasks] = React.useState(() => {
-    const data = localStorage.getItem('tasks');
-    return data ? JSON.parse(data) : [];
-  });
+  const [tasks, setTasks] = React.useState({});
+  const [categories, setCategories] = React.useState({});
+  const [pendingTasks, setPendingTasks] = React.useState(0);
 
   React.useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+    const fetchData = async () => {
+      const todos = await todosAPI.getTodos();
+      setTasks(todos);
+    };
+    fetchData();
+  }, []);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const categories = await categoriesAPI.getCategories();
+      setCategories(categories);
+    };
+    fetchData();
+  }, []);
+
+  React.useEffect(() => {
+    const pendingTasks = Object.keys(tasks).filter(key => !tasks[key].completed).length;
+    setPendingTasks(pendingTasks);
   }, [tasks]);
 
   const [filter, setFilter] = React.useState('Todas');
 
   const taskNoun = tasks.length !== 1 ? 'tareas' : 'tarea';
-  const headingText = `${tasks.length} ${taskNoun} pendientes`;
+  const headingText = `${pendingTasks} ${taskNoun} pendientes`;
 
-  const taskList = tasks
-  .filter(FILTER_MAP[filter])
-  .map(task => (
+  const taskList = Object.keys(tasks)
+  .filter(key => FILTER_MAP[filter](tasks[key]))
+  .map(key => (
     <Todo
-      key={task.id}
-      id={task.id}
-      name={task.name}
-      completed={task.completed}
+      key={key}
+      id={key}
+      name={tasks[key].name}
+      category={tasks[key].category}
+      completed={tasks[key].completed}
+      categories={categories}
       toggleTaskCompleted={toggleTaskCompleted}
       deleteTask={deleteTask}
       editTask={editTask}
@@ -55,40 +75,55 @@ function App() {
     />
   ));
 
-  function addTask(name) {
-    const newTask = { id: `todo-${nanoid()}` + tasks.length, name: name, completed: false };
-    setTasks([...tasks, newTask]);
+  async function addTask(name, category) {
+    const newTask = { name: name, completed: false, category: category };
+    const key = await todosAPI.addTodo(
+      newTask
+    );
+    setTasks({...tasks, [key]: newTask});
   }
 
-  function toggleTaskCompleted(id) {
-    const updatedTasks = tasks.map(task => {
-      if(id === task.id) {
-        return {...task, completed: !task.completed}
-      }
-      return task;
-    });
-    setTasks(updatedTasks);
+  async function toggleTaskCompleted(key) {
+    // get the task from the state
+    const task = tasks[key];
+    task.completed = !task.completed;
+    // update the task in the database
+    await todosAPI.updateTodo(
+      key,
+      task
+    );
+    // update the task in the state
+    setTasks({...tasks, [key]: task});
   }
 
-  function deleteTask(id) {
-    const remainingTasks = tasks.filter(task => id !== task.id);
-    setTasks(remainingTasks);
+  async function deleteTask(key) {
+    // remove the task from the database
+    await todosAPI.deleteTodo(key);
+
+    // remove the task from the state
+    const newTasks = {...tasks};
+    delete newTasks[key];
+    setTasks(newTasks);
+
   }
 
-  function editTask(id, newName) {
-    const editedTaskList = tasks.map(task => {
-      if(id === task.id) {
-        return {...task, name: newName}
-      }
-      return task;
-    });
-    setTasks(editedTaskList);
+  async function editTask(key, newName, newCategory) {
+    const task = tasks[key];
+    task.name = newName;
+    task.category = newCategory;
+
+    await todosAPI.updateTodo(
+      key,
+      task
+    );
+
+    setTasks({...tasks, [key]: task});
   }
 
   return (
     <div className="todoapp stack-large">
       <h1>MNA Todo Tasker</h1>
-      <Form addTask={addTask}/>
+      <Form addTask={addTask} categories={categories}/>
       <div className="filters btn-group stack-exception">
         {filterList}
       </div>

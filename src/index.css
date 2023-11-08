@@ -200,6 +200,17 @@ body {
     font-size: 2.4rem;
   }
 }
+/* select */
+.select__lg {
+  padding: 2rem;
+  border: 2px solid #000;
+  background: #fff;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+
 /* Todo item styles */
 .todo {
   display: flex;
@@ -285,4 +296,16 @@ body {
 }
 .c-cb > input[type="checkbox"]:checked + label::after {
   opacity: 1;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.4rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  border-radius: 0.4rem;
+  background: #000;
+  color: #fff;
 }

@@ -4,15 +4,21 @@ function Todo(props) {
 
   const [isEditing, setEditing] = React.useState(false);
   const [newName, setNewName] = React.useState('');
+  const [newCategory, setNewCategory] = React.useState('');
 
   function handleChange(e) {
     setNewName(e.target.value);
   }
 
+  function handleChangeCategory(e) {
+    setNewCategory(e.target.value);
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
-    props.editTask(props.id, newName);
+    props.editTask(props.id, newName, newCategory);
     setNewName("");
+    setNewCategory("");
     setEditing(false);
   }
 
@@ -30,6 +36,20 @@ function Todo(props) {
           onChange={handleChange}
         />
       </div>
+      <div className="form-group">
+        <label className="todo-label" htmlFor={props.id}>
+          Nueva categoría para {props.name}
+        </label>
+        <div className="select">
+          <select name="slct" id="slct" onChange={handleChangeCategory}>
+            <option selected disabled>Selecciona una categoría</option>
+            { Object.keys(props.categories).map((key) => (
+              <option key={key} value={props.categories[key]}>{props.categories[key]}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div className="btn-group">
         <button
           type="button"
@@ -57,7 +77,7 @@ function Todo(props) {
           onChange={() => props.toggleTaskCompleted(props.id)}
         />
         <label className="todo-label" htmlFor={props.id}>
-          {props.name}
+          <span className="category-badge">{props.category}</span> {props.name}
         </label>
       </div>
       <div className="btn-group">
