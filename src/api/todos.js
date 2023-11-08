@@ -2,9 +2,7 @@ import db from "../firebase";
 import {
   ref,
   set,
-  child,
   get,
-  update,
   remove,
   push,
 } from "firebase/database";
