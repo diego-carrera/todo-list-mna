@@ -16,9 +16,13 @@ function Todo(props) {
 
   function handleSubmit(e) {
     e.preventDefault();
+    if ( newName === "" || newCategory === "" ) {
+      alert('No puedes dejar campos vacíos');
+      return;
+    }
+
     props.editTask(props.id, newName, newCategory);
     setNewName("");
-    setNewCategory("");
     setEditing(false);
   }
 

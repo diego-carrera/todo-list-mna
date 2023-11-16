@@ -11,9 +11,13 @@ function Form(props) {
 
   function handleSubmit(e) {
     e.preventDefault();
+    if ( name === "" || category === "" ) {
+      alert('No puedes dejar campos vacíos');
+      return;
+    }
+
     props.addTask(name, category);
     setName("");
-    setCategory("");
   }
 
   function handleSelectChange(e) {
@@ -46,7 +50,7 @@ function Form(props) {
       </h2>
       <div className="select">
         <select name="slct" id="slct" className="select__lg" onChange={handleSelectChange}>
-          <option disabled>Selecciona una categoría</option>
+          <option value={''}>Selecciona una categoría</option>
           { Object.keys(props.categories).map((key) => (
             <option key={key} value={props.categories[key]}>{props.categories[key]}</option>
           ))}
